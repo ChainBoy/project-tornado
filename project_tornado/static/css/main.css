@@ -1,0 +1,36 @@
+.video-media {
+    margin-left: 50px;
+    float: left;
+    margin-top: 0px;
+}
+
+.menu {
+    height: auto;
+    width: 300px;
+    float: left;
+    text-align: left;
+    margin-top: 40px;
+}
+
+.menu-main {
+    margin-left: 30px;
+}
+
+.menu li {
+    padding: 0px 0px 0px 22px;
+    line-height: 24px;
+    /*background: url(/static/images/menu_li.gif) no-repeat 10px 9px;*/
+    display: list-item;
+    text-align: -webkit-match-parent;
+    list-style-image: url("/static/images/menu_li.gif");
+    font-size: 14px;
+    font-weight: bold;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.content-main {
+    float: left;
+    clear: none;
+}
+

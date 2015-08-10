@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+{% if data %}
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>{{ data['title'] }}</title>
+    <link rel="stylesheet" type="text/css" href="/static/css/cssreset.css"/>
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css"/>
+    <link type="text/css" rel="stylesheet" charset="UTF-8" href="../static/google.css">
+    <script>
+        setTimeout("redirectTo('{{ data.get('url', "/") }}')", {{ data.get('time', 3) }});
+        function redirectTo(url) {
+            window.location = url;
+        }
+    </script>
+</head>
+
+<body>
+{% include header.html %}
+<div id="content">
+    <p>{{ data['content'] }} </br>请稍后，正在跳转...</p>
+</div>
+</body>
+{% end %}
+</html>

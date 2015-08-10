@@ -1,0 +1,317 @@
+<meta http-equiv="Content-Type" content="text/html; charset=utf8">
+    <div class="upload" style="width: 1200px;clear: left;">
+        {% if not task_id %}
+        <br>
+        <h1 id="h1-center">音频管理、上传</h1>
+        <!--<br>-->
+        <div id="task"
+             style="float: left; border: 1px solid #e3ffe5; height: 57px;width:400px; margin:20px 30px 0 10px ;">
+            <b style=" float: left; font-size: 18px; font-weight: normal;">选择任务：</b>
+            <select id="select" style="height: 28px;width: 148px; margin-left: 30px; float: left;">
+                <script language="javascript">
+                    $(function(){
+                       function change(task_id){
+                           if (isNaN(parseInt(task_id))  == true){
+                               task_id = $(this)[0].value;
+                           }
+                           if(isNaN(parseInt(task_id))==true)return
+                           $.get(
+                                   '/task/upload',
+                                   {'tid': task_id},
+                                   function(data, status){
+
+                                       $('.files-table').html(data)
+                                   }
+                           )
+                       }
+                        $('#select').change(change)
+                        change($('select')[0].value);
+                    });
+                </script>
+                {% for task in tasks_list %}
+                <option value="{{ task.get('task_id') }}">{{ task.get('task_name') }}</option>
+                {% end %}
+            </select>
+        </div>
+        <div class="files-table">
+        {% else %}
+            <table style="border:0px;" class="stripe" cellpadding="0" cellspacing="1" task_id="{{ task_id }}">
+                <script language="javascript">
+                    $(document).ready(function () {
+                        function change_table(){
+                            var here = this;
+                            var td_index = $(here).attr('index');
+                            var group_files = $(here)[0].files;
+                            var group_len = $('.group').length;
+                            var files_len = group_files.length;
+                            var table = $("table");
+                            for (var i = 0; i < Math.max(files_len, group_len); i++)
+                            {
+                                var text = "";
+                                var  first_argument = "";
+
+                                if (files_len >= group_len){
+                                    text = "<p> " + group_files[i].name +" </p>";
+                                    first_argument = "tr:eq(" + (i + 2) + ") td:eq(" + td_index + ")";
+                                    if (i >= group_len) add_click(table, first_argument, text);
+                                    else $(first_argument,table).html(text);
+                                }
+                                else{
+                                    text = "<p> " + group_files[i].name +" </p>";
+                                    first_argument = "tr:eq(" + (i + 2) + ") td:eq(" + td_index + ")";
+                                    $(first_argument,table).html(text);
+                                }
+                            }
+                        }
+                        function remove_group_list()
+                        {
+                            var sid = $(this).attr('system_id');
+                            var td_index = $(this).attr('index');
+                            sid = sid == undefined ? "" : sid;
+                            $.get(
+                                    "/group/",
+                                {
+                                    "del_tid": $('table').attr('task_id'),
+                                    "del_sid": sid
+                                },
+                                function(){
+                                    if (sid == ""){
+                                        $('.group').remove();
+                                        return
+                                    }
+                                    var group_len = $('.group').length;
+
+                                    for (var i = 0; i < group_len; i++)
+                                    {
+                                        var first_argument = "tr:eq(" + (i + 2) + ") td:eq(" + td_index + ")";
+                                        $(first_argument).html('--');
+                                    }
+                                }
+                            )
+                        }
+                        function upload(){
+                            var index = $(this).attr('id').split('-')[1];
+                            $("#tr_" + index+" input").each(function(){
+                                var the_file = $(this)[0].files[0]
+                                if (the_file != undefined)
+                                {
+                                    var form_data = new FormData();
+                                    form_data.append("voice_file", the_file);
+                                    var system_id = $(this).attr('system_id');
+                                    var group_id = $('#tr_' + index).attr('group_id')
+                                    var task_id = $('table').attr('task_id')
+                                    var r_url = '/task/upload/?gid=' + group_id + '&tid=' + task_id + '&sid=' + system_id
+                                    $.ajax({
+                                        url: r_url,
+                                        type:'POST',
+                                        enctype: 'multipart/form-data',
+                                        data:form_data,
+                                        processData: false,
+                                        contentType: false,
+                                        success:function(data){
+                                            $('#g_' + index + '-t_' + system_id).html('ok');
+                                        }
+                                    });
+                                }
+                            });
+                        };
+
+                        function add_click(table, first_argument, text){
+                            $.get(
+                                    '/group/?tid='+ $('table').attr('task_id'),
+                                    {},
+                                    function(data, status){
+                                        if (status == 'success') $('table').attr('group_id', data);
+
+                                        var index = parseInt($(".group").last().attr('index'));
+                                        if (index != undefined && isNaN(index)==false)
+                                            index += 1;
+                                        else index = 1;
+                                        var group_id = $('table').attr('group_id');
+                                        var tr = '<tr class="group" index="' + index + '" group_id="' + group_id + '" id="tr_' + index + '">' + $("#null-add").html() + "</tr>"
+                                        var null_add = '<tr hidden="hidden" id="null-add">' + $("#null-add").html() + '</tr>'
+                                        $('tbody').append(tr);
+                                        $('#null-add').remove()
+                                        $('tbody').append(null_add);
+                                        $("td", $(".group").last()).first().html(index);
+                                        $("button", $(".group").last()).first().attr('id', 'btn_upload-' + index);
+                                        $('#btn_upload-' + index).click(upload)
+                                        $(first_argument,table).html(text);
+
+                                    });
+                        };
+                        function upload_all(){
+                            var len =  $('.group').length;
+                            var words = $('.input_words');
+                            for (var j = 0; j < len; j++){
+                                var group_id = $('table tr:eq(' + (j + 2) + ')').attr('group_id');
+                                var word = words[j].value;
+                                if (word != ""){
+                                    $.get(
+                                            '/group/',
+                                            {'gid': group_id, 'words': word},
+                                            function(data, status){
+                                                var tmp = 1;
+                                            }
+                                    )
+                                }
+
+                            }
+                            function upload_sys(the){
+                                var index = parseInt($(the).attr('index'));
+                                var files = $(the)[0].files
+                                var system_id = $(the).attr('system_id');
+                                var task_id = $('table').attr('task_id');
+                                for (var i = 0; i < files.length; i++)
+                                {
+                                    var group_id = $('table tr:eq(' + (i + 2) + ')').attr('group_id');
+                                    var the_file = files[i];
+                                    if (the_file != undefined)
+                                    {
+                                        var form_data = new FormData();
+                                        form_data.append('voice_file', the_file);
+                                        var url = '/task/upload/?gid=' + group_id + '&tid=' + task_id + '&sid=' + system_id;
+                                        function up(i, url, system_id, form_data){
+                                        $.ajax({
+                                            url: url,
+                                            type:'POST',
+                                            enctype: 'multipart/form-data',
+                                            data:form_data,
+                                            processData: false,
+                                            contentType: false,
+                                            success:function(data){
+                                                $('#g_' + (i + 1) + '-t_' + system_id).html('ok');
+                                            }
+                                        });}
+                                        up(i, url, system_id, form_data);
+                                    }
+                                }
+                            }
+                            $('.upload_sys').each(function() {upload_sys(this)});
+                        }
+                        function remove_line_tr(){
+                            var group_id = $(this).attr('group_id');
+                            if (group_id == "")
+                            {
+                                $(this).parent().parent().remove();
+                                return
+                            }
+                            var the_tr = $(this).parent().parent();
+                            $.get(
+                                    '/group',
+                                    {'del_gid':group_id},
+                                    function(data, status){
+                                        the_tr.remove();
+                                    }
+                            )
+                        }
+                        function input_words(){
+                            var reader = new FileReader();
+                            var file = $('#file-words')[0].files[0];
+                            reader.readAsText(file, 'gb2312');
+                            reader.onload = function(evt){
+                                var fileString = evt.target.result;
+                                var all_words_list = fileString.split('\n');
+                                var trs = $(".group");
+                                var len = Math.min(trs.length, all_words_list.length)
+                                for (var i = 0; i < len; i ++ ){
+                                    $('.input_words', $(".group")[i]).attr('value', all_words_list[i]);
+                                }
+                            }
+                        }
+                        $(function(){
+                            $("#btn_add-row").click(add_click);
+                            $('#upload-all').click(upload_all);
+                            $('.delete-line-tr').click(remove_line_tr);
+                            $('#delete-all').click(remove_group_list);
+                            $('.btn_del_group').click(remove_group_list);
+                            $(".btn_upload").click(upload);
+                            $("#file-words").change(input_words);
+                        });
+//                        {% for index, i in enumerate(tasks) %} todo:千万不要删除这几行
+                            $("{{ '#td_upload_sys_%s' % i.get('system_id') }} input").change(change_table);
+//                        {% end %}todo:千万不要删除这几行
+                    });
+                </script>
+                <tbody>
+                <tr>
+                    <th width="180">序号</th>
+                    {% for i in tasks %}
+                    {% if i.get('system_id') %}
+                    <th width="180" system_id="{{ i.get('system_id','') }}"> {{ i.get('system_name', '--') }}</th>
+                    {% end %}
+                    {% end %}
+                    <th width="180">添加对应文字</th>
+                    <th width="130">操作</th>
+                </tr>
+
+                <tr>
+                    <td width="80">请选择文件</td>
+                    {% for index, i in enumerate(tasks) %}
+                    {% if i.get('system_id') %}
+                    <td width="80" id="td_upload_sys_{{ i.get('system_id') }}" system_id="{{ i.get('system_id','') }}" index="{{ index + 1 }}">
+                        <input type="file" style="width: 125px;" title=" 为{{ i.get('system_name', '') }}选择音频文件" class="upload_sys"
+                               system_id="{{ i.get('system_id', '') }}" index="{{ index + 1 }}" multiple>
+                        <button class='btn_del_group' system_id="{{ i.get('system_id') }}" index="{{ index +1 }}">清空</button>
+                    </td>
+                    {% end %}
+                    {% end %}
+                    <td>
+                        <input type="file" style="width: 125px;" class="file-words" id="file-words" title="为音频文件选择对应的文字文件.">
+                    </td>
+                    <td width="50" >
+                        <d id="upload-all" title="上传所有文件" href="#"><a href="#">上传</a></d>
+                        <span class="delete-all" title="删除所有文件" id="delete-all" style="float: none;"><a href='#'></a></span>
+                    </td>
+                </tr>
+                {% for group in groups %}
+                    <tr class="group" index="{{ groups.index(group) + 1 }}" group_id="{{ group.get('group_id') }}" id="tr_{{ groups.index(group) + 1 }}">
+                        <td width="80">{{ groups.index(group) + 1 }}</td>
+                        {% for index, file in enumerate(group.get('files')) %}
+                            {% if file %}
+                                <td width="80"id="g_{{ groups.index(group) + 1 }}-t_{{ tasks[index].get('system_id', '') }}">{{ file.split('/')[-1] }}</td>
+                            {% else %}
+                                {% if tasks[group.get('files').index(file)].get('system_id') %}
+                                <td width="80"id="g_{{ groups.index(group) + 1 }}-t_{{ tasks[index].get('system_id', '')  }}" index="{{ index + 2 }}">
+                                    {% if file %}
+                                        {{ file.get('file_name','') }}
+                                    {% else %}
+                                        --
+                                    {% end %}
+                                </td>
+                                {% end %}
+                            {% end %}
+                        {% end %}
+                        <td>
+                            <input class="input_words" id="words_{{ group.get('group_id') }}" group_id="{{ group.get('group_id') }}" value="{{ group.get('group_words') }}"/>
+                        </td>
+
+                        <td width="20">
+                            <span class="delete-line-tr" group_id='{{ group.get("group_id") }}'style="float: none;margin-right: -75px;" title="删除此组"><a href='#'></a></span>
+                        </td>
+                    </tr>
+                {% end %}
+
+                {% if len(tasks) == 0 or (len(tasks) == 1 and not tasks[0].get('system_id')) %}
+                {% else %}
+                <tr id="null-add" hidden="hidden">
+                    <td width="80">{{ len(groups) + 1 }}</td>
+                    {% for index, task in enumerate(tasks) %}
+                        <td width="80" id="g_{{ len(groups) + 1 }}-t_{{ task.get('system_id', '') }}" index="{{ index + 2 }}">
+                            --
+                        </td>
+                    {% end %}
+                    <td>
+                        <input/>
+
+                    </td>
+                    <td width="50">
+                        <span class="delete-line-tr" group_id='{{ i.get("task_id") }}' title="删除此组"></span>
+                    </td>
+                </tr>
+                {% end %}
+                </tbody>
+            </table>
+        {% end %}
+        </div>
+    </div>

@@ -1,0 +1,67 @@
+body {
+    margin: 0 auto;
+    text-align: center
+}
+
+table {
+   /* margin: 0 auto;*/
+    width: 1200px;
+}
+
+table {
+    border: 1px solid #fff;
+}
+
+table p {
+    height: 15px;
+    margin-top: 2px;
+    margin-bottom: 10px
+}
+
+table tr {
+    border: 1px solid #fff;
+
+}
+
+table tr th {
+    border: 1px solid #fff;
+    height: 28px;
+    line-height: 28px;
+    background: RGB(79, 129, 189);
+}
+
+table.stripe tr td {
+    border: 1px solid #fff;
+    height: 28px;
+    line-height: 28px;
+    text-align: center;
+    background: RGB(233, 237, 244);
+    vertical-align: middle;
+}
+
+/* 默认背景被白色 */
+table.stripe tr.alt td {
+    background: RGB(208, 216, 232);
+}
+
+/* 默认隔行背景颜色 */
+table.stripe tr.over td {
+    background: #EEECEB;
+}
+
+/* 鼠标经过时候背景颜色 */
+table .delete-line-tr, table .delete-all, table .delete {
+    background-image: url(/static/images/delete.png);
+    width: 16px;
+    height: 16px;
+    display: inline-flex;
+    margin-left:20px;
+}
+
+.delete-line-tr a, .delete-all a ,.delete a{
+    width: 20px;
+}
+
+.error {
+    color: red
+}

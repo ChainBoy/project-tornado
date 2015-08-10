@@ -1,0 +1,20 @@
+<div class="menu" name="menu" id="menu">
+
+    <a href="#">
+        <li id="/task/" href="/">任务列表</li>
+    </a>
+    {% if admin %}
+    <a href="#">
+        <li id="/task/upload/" href="/">音频管理</li>
+    </a>
+    <a href="#">
+        <li id="/score/view/" href="/">评分详情</li>
+    </a>
+    <a href="#">
+        <li id="/task/create/" href="/">创建任务</li>
+    </a>
+    <a href="#">
+        <li id="/sample-voice/" href="/">样音管理</li>
+    </a>
+    {% end %}
+</div>

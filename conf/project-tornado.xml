@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project_tornado>
+    <database host="127.0.0.1" db="project_tornado" user="root" passwd="kaimen" pool_name="project_tornado_pool
+" pool_size="10" port="3306" commit_size="1000" />
+    <task table_name="tasks" />
+    <client table_name="clients" />
+    <application port="26680" debug="True" gzip="True" address="0.0.0.0" cookie_secret="love_luojingjing_forever" base_dir="project_tornado" static_path="static" template_path="template" files_dir="files/upload" source_dir="files/source" />
+
+    <!-- files_dir   save upload files dir. -->
+    <!-- source_dir  download post files dir -->
+    <redis server="10.20.0.234" port="6379" />
+</project_tornado>
